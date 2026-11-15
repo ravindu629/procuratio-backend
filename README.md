@@ -18,11 +18,11 @@ Spring Boot 4.1.2 · Java 21 · PostgreSQL 16 · Flyway · Maven wrapper
    ```powershell
    .\mvnw spring-boot:run
    ```
-   Flyway creates the tables on start-up. The API runs on http://localhost:8080.
+   Flyway creates the tables on start-up. The API runs on http://localhost:8082.
 
 3. **Point the frontend at it**: add this line to the frontend's `.env`, then restart `npm run dev`:
    ```
-   VITE_TEMPLATE_API_URL=http://localhost:8080
+   VITE_TEMPLATE_API_URL=http://localhost:8082
    ```
 
 ## Endpoints
