@@ -1,0 +1,5 @@
+<configuration>
+	<!-- Normal Spring Boot logging, but hide the embedded PostgreSQL start-up details in tests -->
+	<include resource="org/springframework/boot/logging/logback/base.xml"/>
+	<logger name="io.zonky" level="WARN"/>
+</configuration>
