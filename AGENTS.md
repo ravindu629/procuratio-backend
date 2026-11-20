@@ -30,8 +30,11 @@ Tests: JUnit 5, MockMvc, AssertJ, zonky embedded PostgreSQL.
 
 ```
 src/main/java/com/ceybertech/pdfmedemo/
-  template/     Feature package: Controller (endpoints), Service (rules),
-                Repository (database), PdfTemplate (entity), dto/ (JSON records)
+  template/     Feature package: Controllers (endpoints), TemplateService (rules),
+                repositories (database), Template / TemplateVersion / DocumentType (entities),
+                dto/ (JSON records)
+  audit/        CurrentUser: the only place that decides the current user id (system user
+                until login exists); AuditConfig fills created_by / updated_by automatically
   common/       ApiException, ErrorResponse, GlobalExceptionHandler
   config/       CorsConfig
 src/main/resources/
@@ -62,6 +65,10 @@ as a side effect of another change.
 - `spring.jpa.hibernate.ddl-auto=validate`: Hibernate never changes the schema, so entity
   fields must match the migrations exactly.
 - JSON documents (pdfme templates) are stored as JSONB.
+- Template versioning: published and retired rows of `template.template_version` are locked by a
+  database trigger. Never update or delete them; create a new draft version instead.
+- Never write user ids or audit times by hand: use `CurrentUser` and the auditing annotations.
+- Templates are soft-deleted (`deleted_at`); every query must exclude deleted rows.
 
 ## Code style
 
