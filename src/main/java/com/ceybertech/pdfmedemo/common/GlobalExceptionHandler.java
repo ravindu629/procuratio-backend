@@ -4,10 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -44,6 +46,22 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
 		return respond(HttpStatus.BAD_REQUEST, "Invalid value for '" + e.getName() + "'.");
+	}
+
+	/** For example DELETE without ?rowVersion=. */
+	@ExceptionHandler(MissingServletRequestParameterException.class)
+	ResponseEntity<ErrorResponse> handleMissingParameter(MissingServletRequestParameterException e) {
+		return respond(HttpStatus.BAD_REQUEST, "Required parameter '" + e.getParameterName() + "' is missing.");
+	}
+
+	/**
+	 * A database rule caught a clash the checks above did not, usually two people at the same moment
+	 * (for example both starting a draft, or both using the same name).
+	 */
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException e) {
+		log.warn("Database rule refused a change: {}", e.getMostSpecificCause().getMessage());
+		return respond(HttpStatus.CONFLICT, "This change clashes with another one made at the same time. Reload and try again.");
 	}
 
 	/** Two saves at the same moment: the database version check caught it. */
