@@ -4,13 +4,20 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-/** One item in GET /api/templates. No template JSON, so the list stays small and fast. */
+/** One item of GET /api/templates. Versions are summaries, so the list stays small. */
 public record TemplateSummary(
 		UUID id,
 		String name,
 		String description,
 		List<String> tags,
-		int version,
+		DocumentTypeRef documentType,
+		String status,
+		VersionSummary currentVersion,
+		VersionSummary draftVersion,
+		UUID ownerUserId,
 		Instant createdAt,
-		Instant updatedAt) {
+		UUID createdBy,
+		Instant updatedAt,
+		UUID updatedBy,
+		int rowVersion) {
 }

@@ -1,36 +1,26 @@
 package com.ceybertech.pdfmedemo.template;
 
-import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
- * Database access for pdf_templates. Spring Data writes the SQL from the method names.
+ * Database access for template.template. Deleted (soft-deleted) templates are never returned.
  */
-public interface TemplateRepository extends JpaRepository<PdfTemplate, UUID> {
+public interface TemplateRepository extends JpaRepository<Template, UUID> {
 
-	/** Templates for the list screen, newest first, without the large template JSON. */
-	List<SummaryView> findAllByOrderByUpdatedAtDesc();
+	/** All templates that are not deleted, newest first, with their document type loaded. */
+	@Query("select t from Template t join fetch t.documentType where t.deletedAt is null order by t.updatedAt desc")
+	List<Template> findAllNotDeleted();
 
-	/** Only the columns the list needs (Spring Data selects just these). */
-	interface SummaryView {
+	Optional<Template> findByIdAndDeletedAtIsNull(UUID id);
 
-		UUID getId();
+	boolean existsByDocumentTypeIdAndNameIgnoreCaseAndDeletedAtIsNull(UUID documentTypeId, String name);
 
-		String getName();
-
-		String getDescription();
-
-		List<String> getTags();
-
-		Integer getVersion();
-
-		Instant getCreatedAt();
-
-		Instant getUpdatedAt();
-
-	}
+	boolean existsByDocumentTypeIdAndNameIgnoreCaseAndDeletedAtIsNullAndIdNot(UUID documentTypeId, String name,
+			UUID id);
 
 }
